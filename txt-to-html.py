@@ -118,6 +118,7 @@ if __name__ == '__main__':
                     o_tag("body")
                     ]
         #don't forget to wright those
+        Lines = 
         clo_tag()  # body
         clo_tag()  # html
 
