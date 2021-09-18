@@ -12,7 +12,7 @@ title = "filename"
 tabDepth = 0
 versionNum = 0.1
 styleURL = None
-destDir = '.'
+destDir = './dist/'
 
 cloTagQ = deque()  # store closing tags
 
@@ -56,6 +56,30 @@ def indent(amount, thing="\t"):
     '''
     return thing * amount
 
+def getbody(file, out):
+    count = 0
+    i=0
+    with open (file, 'r', encoding=encode) as f:
+        lines = f.readlines()
+        pendingClosure = False #if we need to close previous paragraph before starting new one
+        for i in range[0, len(lines)]:
+
+            if lines[i] in ['\n', '\r\n']:
+                if lines[i+1] in ['\n', '\r\n']: #if there is a 2nd blank line, then it is a title!
+                    out.append(o_tag('h1'),
+                               lines[i],
+                               clo_tag())
+                else: #if there was one empty line, then it is a paragraph
+                    if pendingClosure:
+                        out.append(clo_tag())
+
+                    out.append(o_tag('p'))
+                    pendingClosure = True
+            else:
+                out.append(lines[i])
+
+def create_html(file, lines):
+    return
 
 if __name__ == '__main__':
     source_dir = "."
@@ -87,19 +111,16 @@ if __name__ == '__main__':
         encode = args.encode
     if args.output:
         global destDir
-        destDir = args.output
+        destDir += args.output
 
     if args.input:    # TODO for more files can loop over them
         """
             this is the main part of the program, where all html conversion happens
         """
         print("file name is {}".format(args.input))
-        txt_file = open(args.input, 'r')
-        title = args.input
-        outputName = title +".html"
 
-        #open the file to wright
-        html_file = open(outputName, 'a')
+        title = args.input
+        outputName = destDir + title +".html"
 
         Lines = ["<doctype html>",
                  o_tag("html", 'lang="{}"'.format(lang), True),
@@ -114,14 +135,18 @@ if __name__ == '__main__':
             styleURL = args.stylesheet
             Lines.append(indent(1) + o_tag("link", 'rel="stylesheet" style="text/css" href="{}"'.format(styleURL), True))
 
-        Lines.append[clo_tag(), # close head
+        Lines.append(clo_tag(), # close head
                     o_tag("body")
-                    ]
-        #don't forget to wright those
-        Lines = 
-        clo_tag()  # body
-        clo_tag()  # html
+                     )
 
-        #don't forget to close files somewhere here
+        body = getbody(title, Lines)
+
+        Lines.append(
+                    clo_tag(), # close body tag
+                    clo_tag() # close html close html tag
+                     )
+
+        create_html(outputName, Lines)
+
 
 
