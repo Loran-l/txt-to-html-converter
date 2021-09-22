@@ -7,11 +7,11 @@
 import argparse
 import os
 import sys
-from collections import deque
+#from collections import deque
 
 
 
-cloTagQ = deque()  # store closing tags
+cloTagStack = []  # store closing tags
 
 
 def o_tag(tag, params_str=None, close_tag=False, indent=""):
@@ -29,8 +29,8 @@ def o_tag(tag, params_str=None, close_tag=False, indent=""):
     if params_str:
         tag_line += params_str
     if close_tag is False:
-        global cloTagQ
-        cloTagQ.append("</"+ tag + ">")
+        global cloTagStack
+        cloTagStack.append("</"+ tag + ">")
         return tag_line + ">"
 
     return tag_line
@@ -41,8 +41,8 @@ def clo_tag():
     closes the tag, that was open by the previous o_tag function
     :return:
     """
-    global cloTagQ
-    return cloTagQ.popleft()
+    global cloTagStack
+    return cloTagStack.pop()
 
 
 def indent(amount, thing="\t"):
@@ -69,7 +69,7 @@ def getbody(file, out):
         lines = f.readlines()
 
         #adding header and opening first paragraph
-        out.extend([indent(tabDepth) + o_tag('h1'),
+        out.extend([indent(tabDepth) + o_tag('h1') +
                    lines[0] + clo_tag(),
                    o_tag(indent(tabDepth) + 'p')]) # opening first paragraph
 
@@ -77,10 +77,9 @@ def getbody(file, out):
             if lines[i] in ['\n', '\r\n']:
                 out.extend([indent(tabDepth) + clo_tag(), #closing previous paragraph
                             indent(tabDepth) + o_tag('p')])
-            out.append(indent(tabDepth) + lines[i])
+            out.append(indent(tabDepth) + lines[i].rstrip())
 
     out.append(indent(tabDepth)+ clo_tag())
-
     return 1
 
 
