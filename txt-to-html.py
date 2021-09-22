@@ -1,4 +1,7 @@
+#!/usr/local/bin/python3
 ###########################################################
+
+
 #                txt-to-html-page
 ###########################################################
 import argparse
@@ -6,37 +9,31 @@ import os
 import sys
 from collections import deque
 
-encode = "utf-8"
-lang = "en"
-title = "filename"
-tabDepth = 0
-versionNum = 0.1
-styleURL = None
-destDir = './dist/'
+
 
 cloTagQ = deque()  # store closing tags
 
 
-def o_tag(tag, space="", params_str=None, close_tag=False):
+def o_tag(tag, params_str=None, close_tag=False, indent=""):
     '''
     Takes tag, generates closing tag, to be used with cloTag function
     Allows to use one-liner tags, like <link href=params_str> if close_tag is set to True
 
     :param tag: "html tag value"
-    :param space: amount of whitespace
     :param params_str: integ parameters, like [name="viewport" content="width=device-width, initial-scale=1"]
     :param close_tag: if this tag can close itself, and does not need separate closing tag, set to TRUE
     :return: opening teg with some optional parameters
     '''
 
-    tag_line = space + "<" + tag
+    tag_line = indent + "<" + tag
     if params_str:
         tag_line += params_str
     if close_tag is False:
         global cloTagQ
-        cloTagQ.append(space + "</"+ tag + ">")
-        return tag_line
-    return tag_line + ">"
+        cloTagQ.append("</"+ tag + ">")
+        return tag_line + ">"
+
+    return tag_line
 
 
 def clo_tag():
@@ -72,17 +69,17 @@ def getbody(file, out):
         lines = f.readlines()
 
         #adding header and opening first paragraph
-        out.append(indent(tabDepth) + o_tag('h1'),
-                   lines[0] + colo_tag(),
-                   o_tag(indent(tabDepth) + 'p')) # opening first paragraph
+        out.extend([indent(tabDepth) + o_tag('h1'),
+                   lines[0] + clo_tag(),
+                   o_tag(indent(tabDepth) + 'p')]) # opening first paragraph
 
-        for i in range[3, len(lines)]:
+        for i in range(3, len(lines)):
             if lines[i] in ['\n', '\r\n']:
-                out.append(indent(tabDepth) + clo_tag(), #closing previous paragraph
-                            o_tag('p'))
+                out.extend([indent(tabDepth) + clo_tag(), #closing previous paragraph
+                            indent(tabDepth) + o_tag('p')])
             out.append(indent(tabDepth) + lines[i])
 
-    out.append(o_tag(tabDepth)+ clo_tag())
+    out.append(indent(tabDepth)+ clo_tag())
 
     return 1
 
@@ -93,6 +90,13 @@ def create_html(file, lines): #this is console debug version of this function
     return
 
 if __name__ == '__main__':
+    encode = "utf-8"
+    lang = "en"
+    title = "filename"
+    tabDepth = 0
+    versionNum = 0.1
+    styleURL = None
+    destDir = './dist/'
     source_dir = "."
     out_dir = "."
 
@@ -115,13 +119,10 @@ if __name__ == '__main__':
     if args.version:
         print("version: {}".format(versionNum))
     if args.language:
-        global lang
         lang = args.language
     if args.encoding:
-        global encode
         encode = args.encode
     if args.output:
-        global destDir
         destDir += args.output
 
     if args.input:    # TODO for more files can loop over them
@@ -142,20 +143,19 @@ if __name__ == '__main__':
                  ]
 
         if args.stylesheet:
-            global styleURL
             styleURL = args.stylesheet
             Lines.append(indent(1) + o_tag("link", 'rel="stylesheet" style="text/css" href="{}"'.format(styleURL), True))
 
-        Lines.append(clo_tag(), # close head
+        Lines.extend([clo_tag(), # close head
                     o_tag("body")
-                     )
+                     ])
 
         body = getbody(title, Lines)
 
-        Lines.append(
+        Lines.extend([
                     clo_tag(), # close body tag
-                    clo_tag() # close html close html tag
-                     )
+                    #clo_tag() # close html close html tag
+                     ])
 
         create_html(outputName, Lines)
 
