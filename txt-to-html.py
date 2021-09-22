@@ -25,6 +25,7 @@ def o_tag(tag, space="", params_str=None, close_tag=False):
     :param tag: "html tag value"
     :param space: amount of whitespace
     :param params_str: integ parameters, like [name="viewport" content="width=device-width, initial-scale=1"]
+    :param close_tag: if this tag can close itself, and does not need separate closing tag, set to TRUE
     :return: opening teg with some optional parameters
     '''
 
@@ -33,7 +34,7 @@ def o_tag(tag, space="", params_str=None, close_tag=False):
         tag_line += params_str
     if close_tag is False:
         global cloTagQ
-        cloTagQ.append(space + tag + ">")
+        cloTagQ.append(space + "</"+ tag + ">")
         return tag_line
     return tag_line + ">"
 
@@ -57,28 +58,38 @@ def indent(amount, thing="\t"):
     return thing * amount
 
 def getbody(file, out):
+    '''
+    parses txt file to get header and paragraphs
+    :param file: name of the txt file to open
+    :param out: array with body
+    :return:
+    '''
     count = 0
     i=0
+    global tabDepth
+    tabDepth = 1
     with open (file, 'r', encoding=encode) as f:
         lines = f.readlines()
-        pendingClosure = False #if we need to close previous paragraph before starting new one
-        for i in range[0, len(lines)]:
 
+        #adding header and opening first paragraph
+        out.append(indent(tabDepth) + o_tag('h1'),
+                   lines[0] + colo_tag(),
+                   o_tag(indent(tabDepth) + 'p')) # opening first paragraph
+
+        for i in range[3, len(lines)]:
             if lines[i] in ['\n', '\r\n']:
-                if lines[i+1] in ['\n', '\r\n']: #if there is a 2nd blank line, then it is a title!
-                    out.append(o_tag('h1'),
-                               lines[i],
-                               clo_tag())
-                else: #if there was one empty line, then it is a paragraph
-                    if pendingClosure:
-                        out.append(clo_tag())
+                out.append(indent(tabDepth) + clo_tag(), #closing previous paragraph
+                            o_tag('p'))
+            out.append(indent(tabDepth) + lines[i])
 
-                    out.append(o_tag('p'))
-                    pendingClosure = True
-            else:
-                out.append(lines[i])
+    out.append(o_tag(tabDepth)+ clo_tag())
 
-def create_html(file, lines):
+    return 1
+
+
+def create_html(file, lines): #this is console debug version of this function
+    for line in lines:
+        print (line)
     return
 
 if __name__ == '__main__':
