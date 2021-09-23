@@ -70,14 +70,15 @@ def getbody(file, out):
 
         #adding header and opening first paragraph
         out.extend([indent(tabDepth) + o_tag('h1') +
-                   lines[0] + clo_tag(),
-                   o_tag(indent(tabDepth) + 'p')]) # opening first paragraph
+                   lines[0].rstrip() + clo_tag(),
+                   indent(tabDepth) + o_tag('p')]) # opening first paragraph
 
         for i in range(3, len(lines)):
             if lines[i] in ['\n', '\r\n']:
                 out.extend([indent(tabDepth) + clo_tag(), #closing previous paragraph
                             indent(tabDepth) + o_tag('p')])
-            out.append(indent(tabDepth) + lines[i].rstrip())
+                continue                                        #who uses 'continue' nowdays, right?
+            out.append(indent(tabDepth + 1) + lines[i].rstrip())
 
     out.append(indent(tabDepth)+ clo_tag())
     return 1
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     source_dir = "."
     out_dir = "."
 
-    # here i am using lovely argparse library, that will creahe help menu, and allow my script to take arguments
+    # here i am using argparse library, that will create help menu
     parser = argparse.ArgumentParser(
         description="Will convert txt file into html file",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=90, width=120))
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     if args.output:
         destDir += args.output
 
-    if args.input:    # TODO for more files can loop over them
+    if args.input:    # TODO for multiple files can loop over them
         """
             this is the main part of the program, where all html conversion happens
         """
@@ -134,7 +135,7 @@ if __name__ == '__main__':
         outputName = destDir + title +".html"
 
         Lines = ["<doctype html>",
-                 o_tag("html", 'lang="{}"'.format(lang), True),
+                 o_tag("html", 'lang="{}"'.format(lang)),
                  o_tag("head"),
                  indent(1) + o_tag('meta','charset="{}"'.format(lang), True),
                  indent(1) + o_tag("title") + title + clo_tag(),
@@ -153,10 +154,7 @@ if __name__ == '__main__':
 
         Lines.extend([
                     clo_tag(), # close body tag
-                    #clo_tag() # close html close html tag
+                    clo_tag() # close html close html tag
                      ])
 
         create_html(outputName, Lines)
-
-
-
