@@ -7,7 +7,8 @@
 import argparse
 import os
 import sys
-#from collections import deque
+import re
+# from collections import deque
 
 
 cloTagStack = []  # store closing tags
@@ -78,6 +79,51 @@ def getbody(file, out):
                             indent(tabDepth) + o_tag('p')])
                 continue  # who uses 'continue' nowdays, right?
             out.append(indent(tabDepth + 1) + lines[i].rstrip())
+
+    out.append(indent(tabDepth) + clo_tag())
+    return 1
+
+
+def get_md_body(file, out):
+    '''
+    parses md file to get header and paragraphs
+    :param file: name of the .md file to open
+    :param out: array with body
+    :return:
+    '''
+    count = 0
+    i = 0
+    global tabDepth
+    global pline1
+    global pline2
+    global pline
+    tabDepth = 1
+    pline1 = ""
+    pline2 = ""
+
+    with open(file, 'r', encoding=encode) as f:
+        for lines in f.readlines():
+            # adding header
+            if lines.startswith("#"):
+                out.extend([indent(tabDepth) + o_tag('h1') +
+                            lines.lstrip("#").strip() + clo_tag(),
+                            indent(tabDepth) + o_tag('p')])  # opening first paragraph
+
+        # for i in range(2, len(lines)):
+        #     pline[i] = f.readline()
+            # the line has italic markdown
+
+            pline1 = re.sub(r'(_[^\r\n\_].*?_)|(\*[^\r\n\*].*?\*)',
+                            lambda s: "<i>{}</i>".format(s[0][1:-1]), lines)
+            out.append(indent(tabDepth + 1) +
+                       pline1)
+
+        # the line has bold markdown
+
+            pline2 = re.sub(r'(__[^\r\n\_].*?__)|(\*\*[^\r\n\*].*?\*\*)',
+                            lambda s: "<b>{}</b>".format(s[0][2:-2]), lines)
+
+        out.append(indent(tabDepth + 1) + pline2.rstrip())
 
     out.append(indent(tabDepth) + clo_tag())
     return 1
@@ -156,8 +202,10 @@ if __name__ == '__main__':
         Lines.extend([clo_tag(),  # close head
                       o_tag("body")
                       ])
-
-        body = getbody(title, Lines)
+        if title.endswith(".txt"):
+            body = getbody(title, Lines)
+        elif title.endswith(".md"):
+            body = get_md_body(title, Lines)
 
         Lines.extend([
             clo_tag(),  # close body tag
