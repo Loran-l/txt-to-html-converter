@@ -109,8 +109,6 @@ def get_md_body(file, out):
                             lines.lstrip("#").strip() + clo_tag(),
                             indent(tabDepth) + o_tag('p')])  # opening first paragraph
 
-        # for i in range(2, len(lines)):
-        #     pline[i] = f.readline()
             # the line has italic markdown
 
             pline1 = re.sub(r'(_[^\r\n\_].*?_)|(\*[^\r\n\*].*?\*)',
@@ -118,7 +116,7 @@ def get_md_body(file, out):
             out.append(indent(tabDepth + 1) +
                        pline1)
 
-        # the line has bold markdown
+            # the line has bold markdown
 
             pline2 = re.sub(r'(__[^\r\n\_].*?__)|(\*\*[^\r\n\*].*?\*\*)',
                             lambda s: "<b>{}</b>".format(s[0][2:-2]), lines)
