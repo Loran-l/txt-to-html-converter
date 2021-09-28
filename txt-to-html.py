@@ -7,18 +7,20 @@
 import argparse
 import os
 import sys
-#from collections import deque
+
+import re
 
 
 
 cloTagStack = []  # store closing tags
 
 
+cloTagStack = []  # store closing tags
+
 def o_tag(tag, params_str=None, close_tag=False, indent=""):
     '''
     Takes tag, generates closing tag, to be used with cloTag function
     Allows to use one-liner tags, like <link href=params_str> if close_tag is set to True
-
     :param tag: "html tag value"
     :param params_str: integ parameters, like [name="viewport" content="width=device-width, initial-scale=1"]
     :param close_tag: if this tag can close itself, and does not need separate closing tag, set to TRUE
@@ -30,7 +32,7 @@ def o_tag(tag, params_str=None, close_tag=False, indent=""):
         tag_line += params_str
     if close_tag is False:
         global cloTagStack
-        cloTagStack.append("</"+ tag + ">")
+        cloTagStack.append("</" + tag + ">")
         return tag_line + ">"
 
     return tag_line
@@ -54,6 +56,7 @@ def indent(amount, thing="\t"):
     '''
     return thing * amount
 
+
 def getbody(file, out):
     '''
     parses txt file to get header and paragraphs
@@ -62,32 +65,77 @@ def getbody(file, out):
     :return:
     '''
     count = 0
-    i=0
+    i = 0
     global tabDepth
     tabDepth = 1
-    with open (file, 'r', encoding=encode) as f:
+    with open(file, 'r', encoding=encode) as f:
         lines = f.readlines()
 
-        #adding header and opening first paragraph
+        # adding header and opening first paragraph
         out.extend([indent(tabDepth) + o_tag('h1') +
                    lines[0].rstrip() + clo_tag(),
-                   indent(tabDepth) + o_tag('p')]) # opening first paragraph
+                   indent(tabDepth) + o_tag('p')])  # opening first paragraph
 
         for i in range(3, len(lines)):
             if lines[i] in ['\n', '\r\n']:
-                out.extend([indent(tabDepth) + clo_tag(), #closing previous paragraph
+                out.extend([indent(tabDepth) + clo_tag(),  # closing previous paragraph
                             indent(tabDepth) + o_tag('p')])
-                continue                                        #who uses 'continue' nowdays, right?
+                continue  # who uses 'continue' nowdays, right?
             out.append(indent(tabDepth + 1) + lines[i].rstrip())
 
-    out.append(indent(tabDepth)+ clo_tag())
+    out.append(indent(tabDepth) + clo_tag())
     return 1
 
 
-def create_html(file, lines): #this is console debug version of this function
+def get_md_body(file, out):
+    '''
+    parses md file to get header and paragraphs
+    :param file: name of the .md file to open
+    :param out: array with body
+    :return:
+    '''
+    count = 0
+    i = 0
+    global tabDepth
+    global pline1
+    global pline2
+    global pline
+    tabDepth = 1
+    pline1 = ""
+    pline2 = ""
+
+    with open(file, 'r', encoding=encode) as f:
+        for lines in f.readlines():
+            # adding header
+            if lines.startswith("#"):
+                out.extend([indent(tabDepth) + o_tag('h1') +
+                            lines.lstrip("#").strip() + clo_tag(),
+                            indent(tabDepth) + o_tag('p')])  # opening first paragraph
+
+            # the line has italic markdown
+
+            pline1 = re.sub(r'(_[^\r\n\_].*?_)|(\*[^\r\n\*].*?\*)',
+                            lambda s: "<i>{}</i>".format(s[0][1:-1]), lines)
+            out.append(indent(tabDepth + 1) +
+                       pline1)
+
+            # the line has bold markdown
+
+            pline2 = re.sub(r'(__[^\r\n\_].*?__)|(\*\*[^\r\n\*].*?\*\*)',
+                            lambda s: "<b>{}</b>".format(s[0][2:-2]), lines)
+
+        out.append(indent(tabDepth + 1) + pline2.rstrip())
+
+    out.append(indent(tabDepth) + clo_tag())
+
+    return 1
+
+
+def create_html(file, lines):  # this is console debug version of this function
     for line in lines:
-        print (line)
+        print(line)
     return
+
 
 if __name__ == '__main__':
     encode = "utf-8"
@@ -106,14 +154,19 @@ if __name__ == '__main__':
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=90, width=120))
     groupGeneral = parser.add_argument_group()
 
-    groupGeneral.add_argument('-i', '--input', help='input file location', metavar="FILE")
-    groupGeneral.add_argument('-v', '--version', help='version number', action='store_true')
-    groupGeneral.add_argument('-o', '--output', help='destination to place output file(s)', metavar="DESTDIR")
+    groupGeneral.add_argument(
+        '-i', '--input', help='input file location', metavar="FILE")
+    groupGeneral.add_argument(
+        '-v', '--version', help='version number', action='store_true')
+    groupGeneral.add_argument(
+        '-o', '--output', help='destination to place output file(s)', metavar="DESTDIR")
     groupGeneral.add_argument('-s', '--stylesheet', help='allow the user to optionally specify URL to a CSS '
                                                          'stylesheet to be used in the <head> of your generated HTML '
-                                                         'files', metavar='URL' )
-    groupGeneral.add_argument('-l', '--language', help='specify language such as: en, ru ...', metavar='LANG')
-    groupGeneral.add_argument('-e', '--encoding', help="specify page encoding, such as utf-8", metavar='ENCODE')
+                                                         'files', metavar='URL')
+    groupGeneral.add_argument(
+        '-l', '--language', help='specify language such as: en, ru ...', metavar='LANG')
+    groupGeneral.add_argument(
+        '-e', '--encoding', help="specify page encoding, such as utf-8", metavar='ENCODE')
     args = parser.parse_args()
 
     if args.version:
@@ -132,29 +185,35 @@ if __name__ == '__main__':
         print("file name is {}".format(args.input))
 
         title = args.input
-        outputName = destDir + title +".html"
+        outputName = destDir + title + ".html"
 
         Lines = ["<doctype html>",
                  o_tag("html", 'lang="{}"'.format(lang)),
                  o_tag("head"),
-                 indent(1) + o_tag('meta','charset="{}"'.format(lang), True),
+                 indent(1) + o_tag('meta', 'charset="{}"'.format(lang), True),
                  indent(1) + o_tag("title") + title + clo_tag(),
-                 indent(1) + o_tag("meta", 'content="width=device-width, initial-scale=1"', True)
+                 indent(1) + o_tag("meta",
+                                   'content="width=device-width, initial-scale=1"', True)
                  ]
 
         if args.stylesheet:
             styleURL = args.stylesheet
-            Lines.append(indent(1) + o_tag("link", 'rel="stylesheet" style="text/css" href="{}"'.format(styleURL), True))
 
-        Lines.extend([clo_tag(), # close head
-                    o_tag("body")
-                     ])
+            Lines.append(indent(
+                1) + o_tag("link", 'rel="stylesheet" style="text/css" href="{}"'.format(styleURL), True))
 
-        body = getbody(title, Lines)
+        Lines.extend([clo_tag(),  # close head
+                      o_tag("body")
+                      ])
+        if title.endswith(".txt"):
+            body = getbody(title, Lines)
+        elif title.endswith(".md"):
+            body = get_md_body(title, Lines)
 
         Lines.extend([
-                    clo_tag(), # close body tag
-                    clo_tag() # close html close html tag
-                     ])
+            clo_tag(),  # close body tag
+            clo_tag()  # close html close html tag
+        ])
+
 
         create_html(outputName, Lines)
