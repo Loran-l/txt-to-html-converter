@@ -7,12 +7,15 @@
 import argparse
 import os
 import sys
+
 import re
-# from collections import deque
+
 
 
 cloTagStack = []  # store closing tags
 
+
+cloTagStack = []  # store closing tags
 
 def o_tag(tag, params_str=None, close_tag=False, indent=""):
     '''
@@ -124,6 +127,7 @@ def get_md_body(file, out):
         out.append(indent(tabDepth + 1) + pline2.rstrip())
 
     out.append(indent(tabDepth) + clo_tag())
+
     return 1
 
 
@@ -194,6 +198,7 @@ if __name__ == '__main__':
 
         if args.stylesheet:
             styleURL = args.stylesheet
+
             Lines.append(indent(
                 1) + o_tag("link", 'rel="stylesheet" style="text/css" href="{}"'.format(styleURL), True))
 
@@ -209,5 +214,6 @@ if __name__ == '__main__':
             clo_tag(),  # close body tag
             clo_tag()  # close html close html tag
         ])
+
 
         create_html(outputName, Lines)

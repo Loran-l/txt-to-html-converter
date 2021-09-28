@@ -1,5 +1,3 @@
-# txt-to-html-converter
-
 Converts txt and .md to plane html static site
 
 ## Features
@@ -31,3 +29,4 @@ Converts txt and .md to plane html static site
 > `python txt-to-html-converter.py -i test2.md
 
 > ` python txt-to-html-converter.py -i test.txt
+
