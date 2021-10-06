@@ -148,6 +148,7 @@ if __name__ == '__main__':
     destDir = './dist/'
     source_dir = "."
     out_dir = "."
+    input = None
 
     # here i am using argparse library, that will create help menu
     parser = argparse.ArgumentParser(
@@ -174,7 +175,21 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.config:
-        pass
+        configPath = args.config
+        if configPath == "" or not configPath.endswith(".json"):
+            print("Invalid config file! Currently only support one *.json file")
+            exit(-1)
+        with open(configPath, encoding=encode) as configFile:
+            configData = json.load(configFile)
+            for key in configData:
+                if key == 'input':
+                    input = configData[key]
+                elif key == 'output':
+                    destDir = configData[key]
+                elif key == 'language' or key == 'lang':
+                    lang = configData[key]
+                elif key == 'encode' or key == 'encoding':
+                    encode = configData[key]
     else:
         if args.version:
             print("version: {}".format(versionNum))
@@ -187,13 +202,13 @@ if __name__ == '__main__':
         if args.input:
             input = args.input
 
-    if input:    # TODO for multiple files can loop over them
+    if input and len(input) > 0:    # TODO for multiple files can loop over them
         """
             this is the main part of the program, where all html conversion happens
         """
-        print("file name is {}".format(args.input))
+        print("file name is {}".format(input))
 
-        title = args.input
+        title = input
         outputName = destDir + title + ".html"
 
         Lines = ["<doctype html>",
@@ -226,3 +241,7 @@ if __name__ == '__main__':
 
 
         create_html(outputName, Lines)
+    
+    else:
+        print("Invalid input")
+        exit(-1)
