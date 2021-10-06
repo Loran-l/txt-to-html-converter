@@ -2,10 +2,15 @@ Converts txt and .md to plane html static site
 
 ## Features
 
-> So far, this tool has the following functions:
-
-- Allows the user to open a .txt file or .md file and generate a .html file.
-- Allow user to check the tool's version.
+| Command | Description |
+| ------- | ----------- |
+| `--help`/`-h` | Display the full list of features |
+| `--version`/`-v` | Check the tool version |
+| `--input`/`-i <INPUT_FILE_OR_FOLDER>` | Specify input file or folder |
+| `--output`/`-o <OUTPUT_FOLDER>` | Specify output folder (default is `./dist`) |
+| `--lang`/`-l <LANGUAGE_CODE>` | Specify language for output file(s) (default is `en`) |
+| `--encoding`/`-e <ENCODING_NAME>` | Specify character encoding (default is `utf-8`) |
+| `--config`/`-c <CONFIG_JSON_FILE>` | Load custom configuration from a JSON file |
 
 ## Installation
 
