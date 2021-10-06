@@ -242,6 +242,6 @@ if __name__ == '__main__':
 
         create_html(outputName, Lines)
     
-    else:
+    elif not args.version:
         print("Invalid input")
         exit(-1)
