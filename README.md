@@ -31,7 +31,7 @@ Converts txt and .md to plane html static site
 
 ## Example
 
-> `python txt-to-html.py -i test2.md
+> `python txt-to-html.py -i test2.md`
 
-> `python txt-to-html.py -i test.txt
+> `python txt-to-html.py -i test.txt`
 
