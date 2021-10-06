@@ -8,6 +8,7 @@ import argparse
 import os
 import sys
 
+import json
 import re
 
 
@@ -167,18 +168,26 @@ if __name__ == '__main__':
         '-l', '--language', help='specify language such as: en, ru ...', metavar='LANG')
     groupGeneral.add_argument(
         '-e', '--encoding', help="specify page encoding, such as utf-8", metavar='ENCODE')
+    groupGeneral.add_argument(
+        '-c', '--config', help='specify config file to be used, must be JSON format', metavar='CONFIG'
+    )
     args = parser.parse_args()
 
-    if args.version:
-        print("version: {}".format(versionNum))
-    if args.language:
-        lang = args.language
-    if args.encoding:
-        encode = args.encode
-    if args.output:
-        destDir += args.output
+    if args.config:
+        pass
+    else:
+        if args.version:
+            print("version: {}".format(versionNum))
+        if args.language:
+            lang = args.language
+        if args.encoding:
+            encode = args.encode
+        if args.output:
+            destDir += args.output
+        if args.input:
+            input = args.input
 
-    if args.input:    # TODO for multiple files can loop over them
+    if input:    # TODO for multiple files can loop over them
         """
             this is the main part of the program, where all html conversion happens
         """
