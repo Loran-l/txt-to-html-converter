@@ -15,18 +15,18 @@ Converts txt and .md to plane html static site
 
 1. Generate a .html file from a file or folder:
 
-   > ` python txt-to-html-converter.py -i/--input <file name or folder name>`
+   > ` python txt-to-html.py -i/--input <file name or folder name>`
 
 2. Check the tool's version
 
-   > ` python txt-to-html-converter.py –v/--version`
+   > ` python txt-to-html.py –v/--version`
 
 3. Display how to use the tool
-   > ` python txt-to-html-converter.py –h`
+   > ` python txt-to-html.py –h`
 
 ## Example
 
-> `python txt-to-html-converter.py -i test2.md
+> `python txt-to-html.py -i test2.md
 
-> ` python txt-to-html-converter.py -i test.txt
+> `python txt-to-html.py -i test.txt
 
