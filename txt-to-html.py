@@ -8,6 +8,7 @@ import argparse
 import os
 import sys
 
+import json
 import re
 
 
@@ -147,6 +148,7 @@ if __name__ == '__main__':
     destDir = './dist/'
     source_dir = "."
     out_dir = "."
+    input = None
 
     # here i am using argparse library, that will create help menu
     parser = argparse.ArgumentParser(
@@ -167,24 +169,46 @@ if __name__ == '__main__':
         '-l', '--language', help='specify language such as: en, ru ...', metavar='LANG')
     groupGeneral.add_argument(
         '-e', '--encoding', help="specify page encoding, such as utf-8", metavar='ENCODE')
+    groupGeneral.add_argument(
+        '-c', '--config', help='specify config file to be used, must be JSON format', metavar='CONFIG'
+    )
     args = parser.parse_args()
 
-    if args.version:
-        print("version: {}".format(versionNum))
-    if args.language:
-        lang = args.language
-    if args.encoding:
-        encode = args.encode
-    if args.output:
-        destDir += args.output
+    if args.config:
+        configPath = args.config
+        if configPath == "" or not configPath.endswith(".json"):
+            print("Invalid config file! Currently only support one *.json file")
+            exit(-1)
+        with open(configPath, encoding=encode) as configFile:
+            configData = json.load(configFile)
+            for key in configData:
+                if key == 'input':
+                    input = configData[key]
+                elif key == 'output':
+                    destDir = configData[key]
+                elif key == 'language' or key == 'lang':
+                    lang = configData[key]
+                elif key == 'encode' or key == 'encoding':
+                    encode = configData[key]
+    else:
+        if args.version:
+            print("version: {}".format(versionNum))
+        if args.language:
+            lang = args.language
+        if args.encoding:
+            encode = args.encode
+        if args.output:
+            destDir += args.output
+        if args.input:
+            input = args.input
 
-    if args.input:    # TODO for multiple files can loop over them
+    if input and len(input) > 0:    # TODO for multiple files can loop over them
         """
             this is the main part of the program, where all html conversion happens
         """
-        print("file name is {}".format(args.input))
+        print("file name is {}".format(input))
 
-        title = args.input
+        title = input
         outputName = destDir + title + ".html"
 
         Lines = ["<doctype html>",
@@ -217,3 +241,7 @@ if __name__ == '__main__':
 
 
         create_html(outputName, Lines)
+    
+    elif not args.version:
+        print("Invalid input")
+        exit(-1)
